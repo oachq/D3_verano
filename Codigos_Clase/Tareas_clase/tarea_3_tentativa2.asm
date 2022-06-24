@@ -1,0 +1,160 @@
+	LIST P=18F4550
+	#INCLUDE <P18F4550.inc>
+
+	CONFIG	FOSC=INTOSCIO_EC
+	CONFIG	BOR=OFF
+	CONFIG	PBADEN=OFF
+	CONFIG	LVP=OFF
+	CONFIG	PWRT=ON
+	CONFIG	WDT=OFF
+	CONFIG	CP0=OFF
+	CONFIG	CP1=OFF
+	CONFIG	CPB=OFF
+	CONFIG	XINST=OFF
+	CONFIG	DEBUG=OFF
+	CONFIG	MCLRE=OFF
+
+	CBLOCK	0X20
+	CT0
+	TEMP
+	T_ON
+	T_OFF
+	CUENTA
+	CUENTA2
+	CUENTA3
+	ENDC
+
+	ORG	0X0000
+	GOTO	INICIO
+
+	ORG	0X0008
+	GOTO	ISR_T0
+	
+CPORTS
+	MOVLW	0X0F
+	MOVWF	ADCON1	;PIN DIGITALES
+	MOVLW	0X07
+	MOVWF	CMCON	;DES ACTIVAR COMPARADORES ANALOGICOS 
+	MOVLW	0X62
+	MOVWF	OSCCON	;FOSC INT 4MHZ
+	MOVLW	0XFF
+	MOVWF	TRISD
+	;CLRF	LATD
+	BCF		TRISB,0
+	;CLRF	LATB
+	RETURN
+
+CONFT0
+	MOVLW	0X47
+	MOVWF	T0CON
+	BCF		RCON,IPEN
+	BSF		INTCON,TMR0IE
+	BSF		INTCON,TMR0IP
+	BSF		INTCON,PEIE
+	MOVLW	.61
+	MOVWF	TMR0L
+	MOVLW	.10
+	MOVWF	CT0
+	BCF		INTCON,TMR0IF ; Deshabilitamos la bandera de interrupcion por desbordamiento de Timer0.
+	;BSF		INTCON,TMR0IF
+	RETURN
+
+;01000100 -> x
+;01000111 -> D
+ISR_T0  
+	    BTFSS	INTCON,TMR0IF
+	    BRA		FIN     ;falso 
+	    DECFSZ	CT0,F   ; verdadero
+	    BRA		FIN2     ; no es cero
+	    ;BTG		PORTB,0   ; es cero
+	    BCF		PORTB,0   ; es cero
+	    BTFSS	PORTB,0	    ;instruc V
+	    MOVF	T_ON,W  ; falso
+	    BRA		TOFF    ; verdadero
+	    MOVWF	CT0 
+	    BRA		FIN2
+TOFF    MOVF	T_OFF,W
+	    MOVWF	CT0	
+FIN2	MOVLW	.61
+	    MOVWF	TMR0L
+	    BCF		INTCON,TMR0IF    
+FIN	    RETFIE
+
+; Rtardo.	
+RETARDO
+		MOVLW	.20
+		MOVWF	CUENTA3
+OTRO3	MOVLW	.200
+		MOVWF	CUENTA2
+OTRO2	MOVLW	.82
+		MOVWF	CUENTA
+OTRO 	DECFSZ	CUENTA,F
+		BRA		OTRO
+		DECFSZ	CUENTA2,F
+		BRA		OTRO2	
+		DECFSZ	CUENTA3,F
+		BRA		OTRO3
+		RETURN
+; fin retardo
+
+
+; Programa principal:
+INICIO
+	RCALL	CPORTS
+    rcall   CONFT0
+;    bra     MAIN
+;MAIN	
+;    CLRF	T_ON
+;	CLRF	T_OFF
+;	CLRF	LATD
+;	MOVWF	T_ON
+;	MOVF	PORTD,W
+;	BTFSC	STATUS,Z
+;	BRA		MAIN
+;	MOVWF	LATD
+;	RCALL	RETARDO
+;	BSF		PORTB,0
+;	RCALL	RETARDO
+;	BCF		PORTB,0
+;	MOVF	PORTD,W
+;	MOVWF	T_OFF
+;	BTFSC	STATUS,Z
+;	BRA		MAIN
+;	MOVWF	LATD
+;	RCALL	CONFT0
+;	BSF		T0CON,TMR0ON    ; activamos TMR0
+;	BSF		INTCON,GIE
+;	;bra     ISR_T0
+;	BRA		$
+
+LOOP
+    MOVF    LATD, W
+    movwf   T_ON
+    DECFSZ  T_ON,F   
+    bsf     LATB,0
+    MOVF    LATD,W
+    movwf   T_OFF
+    DECFSZ  T_OFF,F
+    bcf     LATB,0
+    RCALL	CONFT0
+    BSF		T0CON,TMR0ON    ; activamos TMR0
+    BSF		INTCON,GIE
+    bra $
+    ;bra     LOOP
+    ;bsf     PORTB,0; no es cero
+    ;btfss INTCON,TMR0IF	; ; es cero, Si la bandera de TMR0IF=1, salta la siguiente instruccion, y T_OFF= 0
+    ;bra    LOOP			; Ir a LOOP. 
+    ;bcf   INTCON,TMR0IF	; Ponemos a 0 el bit TMR0IF del registro INTCON.
+    ;btg   LATB,LATB0		; Conmutamos el estado del pin RB0.
+    ;BSF		T0CON,TMR0ON    ; activamos TMR0
+	;BSF		INTCON,GIE
+    ;bra LOOP
+  
+
+    END
+
+; 34.24 ex
+; .7 tarea
+; 40 proj
+
+

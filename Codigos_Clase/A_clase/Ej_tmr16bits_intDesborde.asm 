@@ -1,0 +1,72 @@
+    LIST	P=18F4550
+	#INCLUDE	<P18F4550.INC>
+	
+	CONFIG	FOSC=INTOSCIO_EC
+	CONFIG	BOR=OFF	
+	CONFIG	CP0=OFF	
+	CONFIG	CP1=OFF	
+	CONFIG	CPB=OFF	
+	CONFIG	DEBUG=OFF	
+	CONFIG	LVP=OFF	
+	CONFIG	MCLRE=OFF	 
+	CONFIG	PBADEN=OFF
+	CONFIG	PWRT=ON
+	CONFIG	XINST=OFF	
+	CONFIG	WDT=OFF	
+
+    ORG		0X0000
+	GOTO	INICIO
+
+	ORG		0X0008
+	GOTO	ISR_T0
+
+CPORTS
+	MOVLW	0FH
+	MOVWF	ADCON1
+	MOVLW	07H
+	MOVWF	CMCON
+	MOVLW	62H
+	MOVWF	OSCCON
+
+    BCF     TRISB,0 ; puerto B, 0 como salida 
+	;clrf	TRISD
+	;clrf	TRISC
+	;clrf	TRISD
+	;clrf	LATD
+	;clrf	LATD
+	RETURN
+
+CONF_T0
+    movlw B'00000111'
+    movwf T0CON
+    movlw   0xFA ; datos de la formula
+    movwf   TMR0H
+    movlw   0xEA    
+    movwf   TMR0L
+    BCF		INTCON,TMR0IF ; limpiamos banderas
+	BSF		INTCON,TMR0IE   ; habilitamos la interrupcion por desbordamiento
+	
+    return
+
+ISR_T0
+	BTFSS	INTCON,TMR0IF   ;si la bandera de interrupcion del tmr0 se prende 
+    bra     FIN
+   	BCF		INTCON,TMR0IF
+    btg     PORTB,0      ; aqui seria la subrutina para port led
+    movlw   0xFA ; datos de la formula
+    movwf   TMR0H
+    movlw   0xEA    
+    movwf   TMR0L
+FIN    RETFIE
+   
+INICIO
+    rcall   CPORTS
+    rcall   CONF_T0
+	BSF		T0CON,TMR0ON    ; habilitamos el tmr0
+	BSF		INTCON,GIE
+LOOP nop   
+    bra     LOOP
+    END
+
+
+    

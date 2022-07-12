@@ -148,7 +148,8 @@ FIGURA_LLUVIA
 ;1
   ; prendemos leds 1, 9, 17 y 25
   bsf  PISO_5
-
+    movlw   .1
+    rcall   DELAY_MS
   bcf GL_1
   bcf GL_2
   bcf GL_3
@@ -163,13 +164,15 @@ FIGURA_LLUVIA
   bsf GLE_0
   bsf GLE_1
   bsf GLE_2
-  
+   movlw   .1
+   rcall   DELAY_MS
   bcf  PISO_5
   
 ;2
   ; prendemos leds 1, 9, 17 y 25
   bsf  PISO_4
-  
+    movlw   .1
+   rcall   DELAY_MS
   bcf GL_1
   bcf GL_2
   bcf GL_3
@@ -206,14 +209,16 @@ FIGURA_LLUVIA
   bsf GLE_0
   bsf GLE_1
   bsf GLE_2
-
+  movlw   .1
+   rcall   DELAY_MS
   bcf  PISO_3
   
 
 ;4
   ; prendemos leds 1, 9, 17 y 25
   bsf  PISO_2
-  
+    movlw   .1
+   rcall   DELAY_MS
   bcf GL_1
   bcf GL_2
   bcf GL_3
@@ -228,13 +233,15 @@ FIGURA_LLUVIA
   bsf GLE_0
   bsf GLE_1
   bsf GLE_2
-  
+    movlw   .1
+   rcall   DELAY_MS
   bcf  PISO_2
 
 ;5
   ; prendemos leds 1, 9, 17 y 25
   bsf  PISO_1
-  
+    movlw   .1
+   rcall   DELAY_MS
   bcf GL_1
   bcf GL_2
   bcf GL_3
@@ -249,7 +256,8 @@ FIGURA_LLUVIA
   bsf GLE_0
   bsf GLE_1
   bsf GLE_2
-  
+    movlw   .1
+   rcall   DELAY_MS
   bcf  PISO_1
   
   return
@@ -408,11 +416,19 @@ BORRAR          ; con esta subrutina borramos  8b
 M1
 	movlw	'H'
 	rcall	LCD_MOSTRAR
-	movlw	'O'
+	movlw	'I'
 	rcall LCD_MOSTRAR
-	movlw	'L'
+	movlw	' '
 	rcall	LCD_MOSTRAR
-	movlw	'A'
+    movlw	'D'
+	rcall	LCD_MOSTRAR
+    movlw	'A'
+	rcall	LCD_MOSTRAR
+    movlw	'R'
+	rcall	LCD_MOSTRAR
+    movlw	'C'
+	rcall	LCD_MOSTRAR
+    movlw	'Y'
 	rcall	LCD_MOSTRAR
 	return
 INICIO
